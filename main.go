@@ -26,7 +26,7 @@ type Config struct {
 
 func checkErr(e error, msg string) {
 	if e != nil {
-		log.Fatalf("%s: %v\n", msg, e)
+		log.Errorf("%s: %v\n", msg, e)
 	}
 }
 

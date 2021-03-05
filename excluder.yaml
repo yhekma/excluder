@@ -1,7 +1,3 @@
 direxcludes:
   - .terraform
   - vendor
-
-extexcludes:
-  - bla1
-  - bla2
