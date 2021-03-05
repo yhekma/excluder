@@ -1,0 +1,7 @@
+direxcludes:
+  - test1
+  - test2
+
+extexcludes:
+  - bla1
+  - bla2
