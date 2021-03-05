@@ -1,6 +1,6 @@
 direxcludes:
-  - test1
-  - test2
+  - .terraform
+  - vendor
 
 extexcludes:
   - bla1
