@@ -11,7 +11,22 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
+
+type counter struct {
+	mu    sync.Mutex
+	value int
+}
+
+func (c *counter) Inc() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.value++
+}
+
+var dirCount counter
+var fileCount counter
 
 func logInit() {
 	log.SetFormatter(&log.TextFormatter{})
@@ -20,7 +35,7 @@ func logInit() {
 }
 
 type Config struct {
-	Dirnames []string `yaml:"direxcludes"`
+	Dirnames   []string `yaml:"direxcludes"`
 	Extensions []string `yaml:"extexcludes"`
 }
 
@@ -51,6 +66,9 @@ func walkAll(root string, extensions, dirnames []string) error {
 						log.Debugf("excluding from backup: %s", path)
 						e := xattr.Set(path, "com.apple.metadata:com_apple_backup_excludeItem", []byte("com.apple.backupd"))
 						checkErr(e, fmt.Sprint("could not set attribute on", path))
+						if e == nil {
+							dirCount.Inc()
+						}
 					}
 				}
 			}
@@ -67,6 +85,9 @@ func walkAll(root string, extensions, dirnames []string) error {
 						log.Debugf("excluding from backup: %s", path)
 						e := xattr.Set(path, "com.apple.metadata:com_apple_backup_excludeItem", []byte("com.apple.backupd"))
 						checkErr(e, fmt.Sprint("could not set attribute on", path))
+						if e == nil {
+							fileCount.Inc()
+						}
 					}
 				}
 			}
@@ -98,4 +119,5 @@ func main() {
 
 	e = walkAll(root, config.Extensions, config.Dirnames)
 	checkErr(e, "could not walk")
+	log.Debugf("excluded %d directories, %d files", dirCount.value, fileCount.value)
 }
